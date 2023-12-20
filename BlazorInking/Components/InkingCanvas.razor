@@ -1,0 +1,17 @@
+﻿@inject IJSRuntime js
+
+<button @onclick="ToggleColorAsync"
+        style="color:@clr">
+    Toggle color between black and red
+</button>
+
+<div @ref="container">
+    <Canvas @onmousemove="MouseMoveCanvasAsync"
+            @onmouseup="MouseUpCanvas"
+            @onmousedown="MouseDownCanvas"
+            width="400"
+            height="400"
+            @ref="_context"
+            style="border: 1px solid red">
+    </Canvas>
+</div>
