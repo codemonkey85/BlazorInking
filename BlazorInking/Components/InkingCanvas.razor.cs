@@ -12,7 +12,11 @@ public partial class InkingCanvas
     private double mousex;
     private double mousey;
     private bool mousedown = false;
-    private string clr = "black";
+
+    private const string black = "black";
+    private const string red = "red";
+
+    private string clr = black;
 
     private class Position
     {
@@ -28,7 +32,7 @@ public partial class InkingCanvas
             return;
         }
 
-        clr = clr == "black" ? "red" : "black";
+        clr = clr == black ? red : black;
         await ctx1.StrokeStyleAsync(clr);
     }
 
@@ -43,8 +47,17 @@ public partial class InkingCanvas
             await ctx1.LineWidthAsync(3);
             await ctx1.LineJoinAsync(LineJoin.Round);
             await ctx1.LineCapAsync(LineCap.Round);
-            // this retrieves the top left corner of the canvas container (which is equivalent to the top left corner of the canvas, as we don't have any margins / padding)
-            var p = await js.InvokeAsync<Position>("eval", $"let e = document.querySelector('[_bl_{container.Id}=\"\"]'); e = e.getBoundingClientRect(); e = {{ 'Left': e.x, 'Top': e.y }}; e");
+            // this retrieves the top left corner of the canvas container
+            // (which is equivalent to the top left corner of the canvas,
+            // as we don't have any margins / padding)
+            var p = await js.InvokeAsync<Position>("eval", $$"""
+                let e = document.querySelector('[_bl_{{container.Id}}=""]');
+                e = e.getBoundingClientRect();
+                e = {
+                    'Left': e.x, 'Top': e.y
+                };
+                e
+                """);
             (canvasx, canvasy) = (p.Left, p.Top);
         }
     }
@@ -72,12 +85,12 @@ public partial class InkingCanvas
         }
         mousex = e.ClientX - canvasx;
         mousey = e.ClientY - canvasy;
-        await DrawCanvasAsync(mousex, mousey, last_mousex, last_mousey, clr);
+        await DrawCanvasAsync(mousex, mousey, last_mousex, last_mousey);
         last_mousex = mousex;
         last_mousey = mousey;
     }
 
-    private async Task DrawCanvasAsync(double prev_x, double prev_y, double x, double y, string clr)
+    private async Task DrawCanvasAsync(double prev_x, double prev_y, double x, double y)
     {
         if (ctx1 is null)
         {
